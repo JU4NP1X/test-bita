@@ -1,7 +1,73 @@
-pip install ython-dotenv
+# Command Line CSV to Database Import Tool
 
-pip install psycopg2
+This command line tool allows you to perform a massive insert from a CSV file to a database table. It provides various options to customize the import process. Below is a list of available options:
 
-pip install pandas
+- **-h, --help:** Show the help message and exit.
+- **-H HOST, --host HOST:** Specify the database host.
+- **-dn DATABASENAME, --databasename DATABASENAME:** Specify the database name.
+- **-tn TABLENAME, --tablename TABLENAME:** Specify the table name to be inserted.
+- **-u USER, --user USER:** Specify the database user.
+- **-p PORT, --port PORT:** Specify the database port.
+- **-s SECURE, --secure SECURE:** Insert the database password during execution and not in the command line (HIGHLY RECOMMENDED IF YOU HAVE NOT SET IT IN ENVIRONMENT VARIABLES).
+- **-P PASSWORD, --password PASSWORD:** Specify the database password (NOT RECOMMENDED, IT WILL BE STORED IN COMMAND LINE HISTORY, use instead --secure).
+- **-k PRIMARYKEY, --primarykey PRIMARYKEY:** Specify the primary key (if it is a complex key, separate by comma).
+- **-t THREADS, --threads THREADS:** Specify the number of threads in the data insertion process (use 0 to not use threads).
+- **-b BATCH, --batch BATCH:** Specify the batch size.
 
-pip install tqdm
+To use this tool, simply run the command with the required arguments and any optional arguments you want to specify. For example:
+
+Please note that some options, such as the database host and user, may have default values specified in the environment variables. You can override these defaults by providing the corresponding command line arguments.
+
+Make sure to properly set the database password, either by using the --secure option to enter it during execution or by setting it in the environment variables. Avoid specifying the password in the command line directly, as it will be stored in the command line history.
+
+If you have any questions or need further assistance, please refer to the help message (-h option) or consult the documentation for this tool.
+
+## Installation process
+- **Direct installation:**
+
+    To add the required modules to your project, you can include them in your requirements.txt file. Open the requirements.txt file and add the following lines:
+
+        python-dotenv
+        psycopg2
+        pandas
+        tqdm
+
+    Or just run:
+    ```bash
+    pip install -r requirements.txt
+    ```
+    
+
+- **Using virtual enviroment (recommended):**
+    
+    Run the following commands:
+    ```bash
+    pip install virtualenv
+    ```
+    ```bash
+    sudo apt install virtualenv
+    ```
+    ```bash
+    virtualenv myenv
+    ```
+    Every time you want to use the virtual enviroment run the following command on the root of your venv:
+    ```bash
+    source myenv/bin/activate
+    ```
+    Now you can run the same process as the direct installation:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Warning
+This code was only tested in python 3.10
+
+
+## Considerations:
+This approach of using Python for performing batch insertion from a CSV file to a database is less efficient than using the copy command directly in the database.
+
+The main reason is that using the copy command in the database allows for faster and more efficient data insertion, as it is an optimized operation specifically designed for this purpose. However, in this case, the requirement is to not use the copy command and instead implement the solution in Python for its practicality and customization capabilities.
+
+It is important to note that using _**threads**_ in the data insertion process (_**threads**_) is only recommended when dealing with a large amount of data. In situations where the amount of data is not substantial, using _**threads**_ may actually slow down the process instead of speeding it up. Therefore, it is necessary to evaluate the data quantity and determine if using threads is appropriate for each specific case.
+
+Additionally, the batch size (_**batch**_) used in the insertion process is also an important factor to consider. A larger batch size can result in a faster process as fewer insertion operations are performed in the database. However, this also means that more memory is consumed as more data needs to be stored in memory before being inserted into the database. Therefore, it is necessary to adjust the batch size according to the amount of information present in the CSV file and the availability of resources in the system where the process is executed. Also, you need to consider the database string length limit when calculating the batch size.

@@ -12,15 +12,18 @@ load_dotenv()
 
 
 class Command_Interface:
-    port = os.getenv("DEFAULT_PORT", 5432)
-    host = os.getenv("DEFAULT_HOST", "localhost")
-    dbname = os.getenv("DEFAULT_DBNAME", "postgres")
-    tname = os.getenv("DEFAULT_TNAME", "test")
-    user = os.getenv("DEFAULT_USER", "postgres")
-    password = os.getenv("DEFAULT_PASSWORD", None)
-    use_secure_pass = False
-    path = None
-    batch_size = os.getenv("BATCH_SIZE", 1000)
+    port: int = int(os.getenv("DEFAULT_PORT", 5432))
+    host: str = str(os.getenv("DEFAULT_HOST", "localhost"))
+    dbname: str = str(os.getenv("DEFAULT_DBNAME", "postgres"))
+    tname: str = str(os.getenv("DEFAULT_TNAME", "test"))
+    user: str = str(os.getenv("DEFAULT_USER", "postgres"))
+    password: str = str(os.getenv("DEFAULT_PASSWORD", None))
+    use_secure_pass: bool = False
+    path: str = None
+    batch_size: int = int(os.getenv("BATCH_SIZE", 1000))
+    cmpd_primary_key: list = os.getenv("PRIMARY_KEY", "PointOfSale,Product,Date").split(
+        ","
+    )
 
     def __init__(self):
         """
@@ -41,8 +44,9 @@ class Command_Interface:
         self.parser.add_argument(
             "-dn", "--databasename", help="Specify the database name"
         )
-        self.parser.add_argument("-b", "--batch", help="Specify the batch size")
-        self.parser.add_argument("-tn", "--tablename", help="Specify the table name")
+        self.parser.add_argument(
+            "-tn", "--tablename", help="Specify the table name to be inserted"
+        )
         self.parser.add_argument("-u", "--user", help="Specify the database user")
         self.parser.add_argument("-p", "--port", help="Specify the database port")
         self.parser.add_argument(
@@ -55,6 +59,18 @@ class Command_Interface:
             "--password",
             help="Specify the database password (NOT RECOMMENDED, IT WILL BE STORED IN COMMAND LINE HISTORY, use instead --secure)",
         )
+        self.parser.add_argument(
+            "-k",
+            "--primarykey",
+            help="Specify the primary key (if is complex key separate by comma)",
+        )
+        self.parser.add_argument(
+            "-t",
+            "--threads",
+            help="Specify the number of threads in the data insertion process (use 0 to not use threads)",
+        )
+
+        self.parser.add_argument("-b", "--batch", help="Specify the batch size")
 
     def parse_command(self):
         """
@@ -84,11 +100,29 @@ class Command_Interface:
 
             if args.password:
                 self.password = args.password
+
+            if args.batch:
+                self.batch_size = int(args.batch)
+
+            # Get array of comma string
+            if args.primarykey:
+                self.cmpd_primary_key = args.primarykey.split(",")
+
+            if args.threads:
+                self.threads = int(args.threads)
+
         else:
             print("No path provided. Use --help for more information")
         # Get the password as a secure string input with a prompt
         if self.use_secure_pass:
             self.password = getpass.getpass(prompt="Enter the database password: ")
+
+        # Exit if not password
+        if not self.password:
+            print(
+                "No password provided in command line or .env. Use --help for more information"
+            )
+            exit()
 
     def get_args_values(self):
         """
@@ -106,10 +140,11 @@ class Command_Interface:
             user: The value of the 'user' of the database
             password: The value of the 'password' of the database
             batch_size: The value of the 'batch_size'
+            primary_key: The value of the 'primary_key'
 
 
         """
-
+        # Print the type of data of the batch
         return (
             self.path,
             self.host,
@@ -119,4 +154,5 @@ class Command_Interface:
             self.user,
             self.password,
             self.batch_size,
+            self.cmpd_primary_key,
         )
