@@ -4,14 +4,14 @@ This module contains a class that allows you to batch insert data into a Postgre
 
 import os
 import psycopg2
-import atexit
+from config.config import config
 from pandas import DataFrame
 
 
 class Postgres_Batch_Insert:
     buffer = []
     query = None
-    posible_date_columns = os.getenv("DATE_COLUMNS", "Date,CreatedAt").split(",")
+    posible_date_columns = config["date_columns"]
 
     def __init__(
         self,
@@ -48,6 +48,7 @@ class Postgres_Batch_Insert:
             password=password,
         )
         self.cursor = self.connection.cursor()
+
     def __del__(self):
         """
         Destructor method to close the connection.
@@ -171,6 +172,9 @@ class Postgres_Batch_Insert:
             if len(self.buffer) > 0:
                 self._send_data()
         finally:
-            self.cursor.close()
-            self.connection.commit()
-            self.connection.close()
+            try:
+                self.cursor.close()
+                self.connection.commit()
+                self.connection.close()
+            except:
+                pass

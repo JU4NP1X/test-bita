@@ -3,39 +3,34 @@ This module contains a class that give an interface to the user to insert data f
 """
 
 import argparse
-from dotenv import load_dotenv
 import os
 import getpass
-
-
-load_dotenv()
+from config.config import config
 
 
 class Command_Interface:
-    port: int = int(os.getenv("DEFAULT_PORT", 5432))
-    host: str = str(os.getenv("DEFAULT_HOST", "localhost"))
-    dbname: str = str(os.getenv("DEFAULT_DBNAME", "postgres"))
-    tname: str = str(os.getenv("DEFAULT_TNAME", "test"))
-    user: str = str(os.getenv("DEFAULT_USER", "postgres"))
-    password: str = str(os.getenv("DEFAULT_PASSWORD", None))
+    port: int = config["port"]
+    host: str = config["host"]
+    dbname: str = config["dbname"]
+    tname: str = config["tname"]
+    user: str = config["user"]
+    password: str = config["password"]
     use_secure_pass: bool = False
     path: str = None
-    batch_size: int = int(os.getenv("BATCH_SIZE", 1000))
-    cmpd_primary_key: list = os.getenv("PRIMARY_KEY", "PointOfSale,Product,Date").split(
-        ","
-    )
+    batch_size: int = config["batch_size"]
+    cmpd_primary_key: list = config["cmpd_primary_key"]
+    threads: int = config["threads"]
 
     def __init__(self):
         """
         Initialize the class with an argument parser and add arguments for path, host, and port.
-
+        
         Args:
             self: The object instance
 
         Returns:
             None
         """
-
         self.parser = argparse.ArgumentParser(
             description="This command allows you to insert data from a .csv file to the database"
         )
@@ -141,6 +136,7 @@ class Command_Interface:
             password: The value of the 'password' of the database
             batch_size: The value of the 'batch_size'
             primary_key: The value of the 'primary_key'
+            threads: The value of the 'threads' used in the insertion
 
 
         """
@@ -155,4 +151,5 @@ class Command_Interface:
             self.password,
             self.batch_size,
             self.cmpd_primary_key,
+            self.threads,
         )

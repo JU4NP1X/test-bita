@@ -1,6 +1,8 @@
 """
 This module is the main file that allows you to insert data from a .csv file to a PostgreSQL database.
 """
+from dotenv import load_dotenv
+load_dotenv()
 from controllers.csv_processor import csv_processor
 
 if __name__ == "__main__":
